@@ -8,6 +8,7 @@ public class Snake implements KeyListener {
 
     private ArrayList<SnakeSection> snakeSections = new ArrayList<>();
     private SnakeDirections direction;
+    private boolean isAlive = true;
 
     public void setDirection(SnakeDirections direction) {
         this.direction = direction;
@@ -26,16 +27,17 @@ public class Snake implements KeyListener {
     }
 
     public void move(){
-        if (direction == SnakeDirections.DOWN){
-            moveInDirection(0,30);
-        } else if (direction == SnakeDirections.UP) {
-            moveInDirection(0, -30);
-        } else if (direction == SnakeDirections.LEFT) {
-            moveInDirection(-30,0);
-        } else if (direction == SnakeDirections.RIGHT) {
-            moveInDirection(30, 0);
+        if (isAlive()){
+            if (direction == SnakeDirections.DOWN){
+                moveInDirection(0,30);
+            } else if (direction == SnakeDirections.UP) {
+                moveInDirection(0, -30);
+            } else if (direction == SnakeDirections.LEFT) {
+                moveInDirection(-30,0);
+            } else if (direction == SnakeDirections.RIGHT) {
+                moveInDirection(30, 0);
+            }
         }
-
     }
 
     private void moveInDirection(int xMoving, int yMoving){
@@ -71,5 +73,13 @@ public class Snake implements KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
 
+    }
+
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public void setAlive(boolean alive) {
+        isAlive = alive;
     }
 }
