@@ -26,25 +26,40 @@ public class Snake implements KeyListener {
         this.snakeSections = snakeSections;
     }
 
-    public void move(){
+    public boolean move(Bunny bunny){
+        boolean feed = false;
+        SnakeSection fakeBunny = new SnakeSection(bunny.getX(), bunny.getY());
+        if (snakeSections.contains(fakeBunny)){
+            feed = true;
+        }
         if (isAlive()){
             if (direction == SnakeDirections.DOWN){
-                moveInDirection(0,30);
+                moveInDirection(0,30, feed);
             } else if (direction == SnakeDirections.UP) {
-                moveInDirection(0, -30);
+                moveInDirection(0, -30, feed);
             } else if (direction == SnakeDirections.LEFT) {
-                moveInDirection(-30,0);
+                moveInDirection(-30,0, feed);
             } else if (direction == SnakeDirections.RIGHT) {
-                moveInDirection(30, 0);
+                moveInDirection(30, 0, feed);
             }
         }
+        return feed;
     }
 
-    private void moveInDirection(int xMoving, int yMoving){
-        SnakeSection snakeHead = snakeSections.get(0);
-        Game.grid[snakeHead.getX()][snakeHead.getY()] = 0;
-        SnakeSection snakeNewHead = new SnakeSection(snakeHead.getX()+xMoving, snakeHead.getY()+yMoving);
-        snakeSections.set(0,snakeNewHead);
+    private void moveInDirection(int xMoving, int yMoving, boolean feed){
+        for (SnakeSection section: snakeSections){
+            Game.grid[section.getX()][section.getY()] = 1;
+        }
+        SnakeSection head = snakeSections.get(snakeSections.size()-1);
+        SnakeSection snakeNewHead = new SnakeSection(head.getX()+xMoving, head.getY()+yMoving);
+        if (snakeSections.contains(snakeNewHead)){
+            this.setAlive(false);
+        }
+        snakeSections.add(snakeNewHead);
+        if (!feed){
+            SnakeSection removed = snakeSections.remove(0);
+            Game.grid[removed.getX()][removed.getY()] = 0;
+        }
 
     }
 

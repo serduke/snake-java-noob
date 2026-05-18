@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Game extends JFrame implements ActionListener {
 
@@ -14,13 +15,15 @@ public class Game extends JFrame implements ActionListener {
     protected static int[][] grid;
     private Timer timer;
     private Snake snake;
+    private Bunny bunny;
     private boolean gameOver = false;
 
     public Game() {
-        setSize(WIDTH, HEIGHT);
+        setSize(WIDTH+SIZE, HEIGHT+SIZE);
         grid = new int[WIDTH][HEIGHT];
         setVisible( true );
         this.timer = new Timer(200, this);
+        this.bunny = new Bunny(210, 210);
         timer.start();
     }
 
@@ -28,10 +31,14 @@ public class Game extends JFrame implements ActionListener {
         this.snake = snake;
     }
 
+    public void setBunny(Bunny bunny) {
+        this.bunny = bunny;
+    }
+
     private void checkBorders(SnakeSection head){
-        if (head.getX() > WIDTH || head.getX() < SIZE){
+        if (head.getX() > WIDTH - SIZE || head.getX() < SIZE){
             snake.setAlive(false);
-        } else if (head.getY() > HEIGHT || head.getY() < SIZE) {
+        } else if (head.getY() > HEIGHT - SIZE || head.getY() < SIZE) {
             snake.setAlive(false);
         }
     }
@@ -40,14 +47,32 @@ public class Game extends JFrame implements ActionListener {
 
         if (snake != null) {
             ArrayList<SnakeSection> snakeSections = snake.getSnakeSections();
-            snake.move();
-            checkBorders(snakeSections.get(0));
+            if (snake.move(bunny)) {
+                Random random = new Random();
+                int rangeX = ((WIDTH-SIZE) - SIZE*2)/SIZE + 1;
+                int rangeY = ((HEIGHT-SIZE) - SIZE*2)/SIZE + 1;
+                int stepsX = random.nextInt(1,rangeX);
+                int stepsY = random.nextInt(1,rangeY);
+                int resultX = stepsX * SIZE;
+                int resultY = stepsY * SIZE;
+                System.out.printf("Bunny: %s %s%n",resultX, resultY);
+                System.out.println();
+                bunny = new Bunny(resultX, resultY);
+            }
+            checkBorders(snakeSections.get(snakeSections.size()-1));
             if (gameOver || !snake.isAlive()){
                 JPanel gameOver = new JPanel();
                 JLabel label = new JLabel("GAME OVER!");
                 gameOver.add(label);
+
+                JButton cancelButton = new JButton("Exit");
+                cancelButton.setActionCommand("Exit");
+                cancelButton.addActionListener(this);
+                gameOver.add(cancelButton);
                 this.add(gameOver);
                 setVisible( true );
+                this.timer.stop();
+
             }
 
             for (SnakeSection section: snakeSections){
@@ -57,10 +82,16 @@ public class Game extends JFrame implements ActionListener {
 
         for (int x = SIZE; x < grid.length - SIZE; x = x+SIZE){
             for (int y = SIZE; y < grid[x].length - SIZE; y = y+SIZE){
-                g.drawRect( x, y, SIZE, SIZE );
+
+                if (grid[x][y] == 2){
+                    g.drawOval(x, y, SIZE, SIZE);
+                    g.fillOval(x, y, SIZE, SIZE);
+                } else {
+                    g.drawRect( x, y, SIZE, SIZE );
+                }
                 if (grid[x][y] == 1){
                     g.fillRect( x, y, SIZE, SIZE );
-                } else {
+                } else if (grid[x][y] == 0) {
                     g.clearRect(x, y,SIZE,SIZE);
                 }
             }
@@ -69,6 +100,10 @@ public class Game extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        String command = e.getActionCommand();
+        if (command != null && command.equals("Exit")){
+            System.exit(0);
+        }
         repaint();
     }
 
